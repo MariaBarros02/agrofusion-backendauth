@@ -1,4 +1,5 @@
 import secrets
+import string
 from passlib.context import CryptContext
 
 # Contexto de hashing seguro usando bcrypt
@@ -19,8 +20,10 @@ def generate_otp_code(length: int = 6) -> str:
     :param length: Longitud del código OTP (por defecto 6 dígitos)
     :return: Código OTP en formato string
     """
-    # Genera un string compuesto solo por dígitos (0–9)
-    return "".join(str(secrets.randbelow(10)) for _ in range(length))
+    # Genera un string compuesto por todas las letras del abecedario y dígitos (0–9)
+
+    alphabet = string.ascii_letters+string.digits
+    return "".join(str(secrets.randbelow(alphabet)) for _ in range(length))
 
 
 def hash_otp_code(code: str) -> str:

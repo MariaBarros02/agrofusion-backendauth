@@ -97,6 +97,7 @@ class AuditRepository:
         outcome: str,
         project_id,
         actor_id=None,
+        mfa_required: None,
         email: str | None = None,
         ip: str | None = None,
         user_agent: str | None = None,
@@ -118,6 +119,8 @@ class AuditRepository:
 
         # Metadata base del evento de login
         metadata = {
+            "actor_id": str(actor_id) , 
+            "mfa_required": mfa_required, 
             "email": email,
             "ip_address": ip,
             "user_agent": user_agent,
@@ -131,6 +134,9 @@ class AuditRepository:
         # Cantidad de intentos fallidos acumulados
         if attempts_count is not None:
             metadata["attempts_count"] = attempts_count
+            
+            if attempts_count >= 3:
+                metadata["account_locked"] = True
 
         # Indica si la cuenta fue bloqueada
         if account_locked is not None:
@@ -242,6 +248,8 @@ class AuditRepository:
 
         # Metadata específica del fallo OTP
         metadata = {
+            "user_id": user.user_id,
+            "otp_verified": False,
             "otp_reason": reason,
             "attempts_count": attempts_count,
             "user_email": user.email,

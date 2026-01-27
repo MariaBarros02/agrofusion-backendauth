@@ -253,3 +253,43 @@ class AuthRepository:
             token.invalidation_reason = reason
 
         return len(tokens)
+
+
+    def terminate_all_user_sessions(self, db: Session, *, user_id, reason: str) -> int:
+            """
+            Finaliza todas las sesiones activas de un usuario y revoca sus tokens.
+            """
+            now = datetime.now(timezone.utc)
+            
+            # 1. Obtener IDs de sesiones activas para revocar tokens después
+            active_sessions = (
+                db.query(AuthSession.sso_session_id)
+                .filter(
+                    AuthSession.user_id == user_id,
+                    AuthSession.terminated_at.is_(None)
+                )
+                .all()
+            )
+            session_ids = [s.sso_session_id for s in active_sessions]
+
+            if not session_ids:
+                return 0
+
+            # 2. Revocar todos los tokens de esas sesiones
+            db.query(AuthToken).filter(
+                AuthToken.sso_session_id.in_(session_ids),
+                AuthToken.revoked_at.is_(None)
+            ).update(
+                {"revoked_at": now, "revoked_reason": reason},
+                synchronize_session=False
+            )
+
+            # 3. Terminar las sesiones
+            count = db.query(AuthSession).filter(
+                AuthSession.sso_session_id.in_(session_ids)
+            ).update(
+                {"terminated_at": now},
+                synchronize_session=False
+            )
+
+            return count

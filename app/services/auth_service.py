@@ -25,7 +25,7 @@ from fastapi import HTTPException, status
 # Configuración de tiempos
 # =========================
 ACCESS_TTL = timedelta(minutes=15)      # Vida útil del access token
-REFRESH_TTL = timedelta(days=7)         # Vida útil del refresh token
+REFRESH_TTL = timedelta(hours=8)         # Vida útil del refresh token
 SESSION_TTL = timedelta(hours=8)        # Duración máxima de la sesión SSO
 
 
@@ -88,6 +88,7 @@ class AuthService:
                 outcome="failure",
                 project_id=project.af_project_id,
                 actor_id=None,
+                mfa_required=None,
                 email=data.email,
                 ip=ip,
                 user_agent=user_agent,
@@ -105,6 +106,7 @@ class AuthService:
                 action_code="AUTH_LOGIN_ATTEMPT",
                 outcome="rejected",
                 actor_id=user.user_id,
+                mfa_required= user.is_mfa_enabled,
                 email=data.email,
                 project_id=project.af_project_id,
                 ip=ip,
@@ -123,6 +125,7 @@ class AuthService:
                 action_code="AUTH_LOGIN_ATTEMPT",
                 outcome="rejected",
                 actor_id=user.user_id,
+                mfa_required= user.is_mfa_enabled,
                 email=data.email,
                 project_id=project.af_project_id,
                 ip=ip,
@@ -143,6 +146,7 @@ class AuthService:
                 action_code="AUTH_LOGIN_ATTEMPT",
                 outcome="rejected",
                 actor_id=user.user_id,
+                mfa_required=user.is_mfa_enabled,
                 email=data.email,
                 ip=ip,
                 project_id=project.af_project_id,
@@ -163,6 +167,7 @@ class AuthService:
                 action_code="AUTH_LOGIN_FAILED",
                 outcome="failure",
                 actor_id=user.user_id,
+                mfa_required=user.is_mfa_enabled,
                 email=data.email,
                 ip=ip,
                 project_id=project.af_project_id,
@@ -236,7 +241,7 @@ class AuthService:
         db.flush()  # ✅ obtenemos sso_session_id sin commit
 
         access_token = create_access_token(
-            {"sub": str(user.user_id), "sid": str(session.sso_session_id)},
+            {"sub": str(user.user_id), "sid": str(session.sso_session_id), "email": user.email, "name": user.name},
             expires_delta=ACCESS_TTL,
         )
 
@@ -257,6 +262,7 @@ class AuthService:
             action_code="AUTH_LOGIN_SUCCESS",
             outcome="success",
             actor_id=user.user_id,
+            mfa_required=user.is_mfa_enabled,
             email=user.email,
             ip=ip,
             project_id=project.af_project_id,
@@ -300,7 +306,7 @@ class AuthService:
             external_projects = external_projects
         )
     
-    def refresh(self, db:Session, refresh_token:str) -> LoginResponse:
+    def refresh_token(self, db:Session, refresh_token:str) -> LoginResponse:
         """
         Renueva un access token usando un refresh token válido.
 
@@ -459,6 +465,8 @@ class AuthService:
             ip=ip,
             user_agent=user_agent,
             metadata={
+                "user_id": user.user_id,
+                "email": user.email, 
                 "otp_verified": True,
                 "verification_time": now.isoformat(),
             },
@@ -721,6 +729,11 @@ class AuthService:
 
         reset_token.used_at = datetime.now(timezone.utc)
 
+        self.auth_repo.terminate_all_user_sessions(
+            db, 
+            user_id=user.user_id, 
+            reason="TOKENS_REVOKED_PASSWORD_CHANGE"
+        )
 
         self.auth_repo.invalidate_all_reset_tokens(
             db,
