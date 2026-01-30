@@ -15,4 +15,5 @@ from app.models.af_email_verification_tokens import EmailVerificationToken
 from app.models.af_password_history import PasswordHistory
 from app.models.af_security_events import SecurityEvent
 from app.models.af_password_reset_tokens import PasswordResetToken
+from app.models.af_external_systems import AfExternalSystem
 

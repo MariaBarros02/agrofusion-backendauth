@@ -50,6 +50,13 @@ class AfExternalProject(Base):
     project_name = Column(String(120))
     # Nombre del cliente propietario del proyecto
     client_name = Column(String(120))
+
+    # Nombre del cliente propietario del proyecto
+    project_image = Column(Text)
+
+    #
+    project_image_mime_type = Column(Text)
+
     # Descripción general del proyecto externo
     description = Column(Text)
 
@@ -100,4 +107,10 @@ class AfExternalProject(Base):
     deleter = relationship(
         "Users",
         foreign_keys=[deleted_by]
+    )
+
+    external_systems = relationship(
+        "AfExternalSystem",
+        back_populates="external_project",
+        lazy="selectin"
     )
