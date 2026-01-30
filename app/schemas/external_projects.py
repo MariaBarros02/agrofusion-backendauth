@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 class ExternalProjectResponse(BaseModel):
@@ -29,6 +29,16 @@ class ExternalProjectResponse(BaseModel):
     # Indica si el proyecto se encuentra activo
     is_active: bool
 
+    #Descripción del sistema
+    description: Optional[str]
+
+    #URL para obtener la imagen 
+    project_image_url: Optional[str]
+
+    #modulos asociados al proyecto
+    systems: List[ExternalSystemResponse]
+
+
     class Config:
         """
         Configuración del schema.
@@ -38,3 +48,26 @@ class ExternalProjectResponse(BaseModel):
         sin necesidad de convertirlos manualmente a dict.
         """
         from_attributes = True  #  clave para SQLAlchemy
+
+class ExternalSystemResponse(BaseModel):
+
+    """
+    Representa los modulos asociados proyecto externo disponible para integración.
+
+    Este schema se utiliza como respuesta en endpoints que
+    listan proyectos externos asociados al usuario o al sistema
+    """
+
+    #id
+    ext_id: UUID
+    #nombre del modulo
+    name: str
+    #url del modulo
+    base_url: Optional[str]
+    #estado del modulo
+    is_active: bool
+    #descripcion del modulo
+    description: Optional[str]
+    #icono del modulo
+    module_icon:Optional[str]
+

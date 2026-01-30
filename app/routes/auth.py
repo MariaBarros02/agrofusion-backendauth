@@ -15,11 +15,8 @@ from app.schemas.auth import (
 from app.services.auth_service import AuthService
 from app.services.sso_service import SsoService
 from app.core.database import get_db
-from app.models.users import Users
 from app.dependencies.auth import get_current_user
 from app.schemas.auth import RefreshTokenRequest
-from typing import List
-from app.schemas.external_projects import ExternalProjectResponse
 
 
 # ======================================================
@@ -342,20 +339,3 @@ def reset_password(
     )
 
 
-@router.get("/external-projects", response_model=List[ExternalProjectResponse], summary="Listar proyectos externos",
-    description="Retorna la lista de proyectos externos activos disponibles para integración SSO.",
-    responses={
-        200: {"description": "Lista de proyectos externos"},
-    })
-def get_external_projects(db: Session = Depends(get_db)):
-    """
-    ### Proyectos externos disponibles
-
-    Retorna los proyectos externos activos
-    habilitados para integración SSO.
-
-    :param db: Sesión activa de base de datos
-    :return: Lista de proyectos externos activos
-    """
-    service = AuthService()
-    return service.get_external_projects(db)

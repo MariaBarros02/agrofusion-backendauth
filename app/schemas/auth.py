@@ -96,7 +96,6 @@ class LoginSuccessResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
-    external_projects: List[ExternalProjectResponse]
 
 
 class LoginMFARequiredResponse(BaseModel):

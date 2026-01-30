@@ -1,5 +1,3 @@
-# app/repositories/audit_repository.py
-
 from sqlalchemy.orm import Session
 from typing import List
 from app.models.af_audit_log import AuditLog
@@ -15,7 +13,6 @@ class AuditRepository:
     Repositorio encargado de la gestión de eventos de auditoría.
 
     Centraliza:
-    - Búsqueda de proyectos
     - Resolución de términos de acción (CatTerm)
     - Registro de eventos de auditoría (login, OTP, eventos genéricos)
     """
@@ -74,20 +71,7 @@ class AuditRepository:
 
         return term.term_id
 
-    def get_active_ext_pro(self, db: Session) -> List[AfExternalProject]:
-        """
-        Obtiene todos los proyectos externos activos.
 
-        :param db: Sesión activa de base de datos
-        :return: Lista de proyectos externos activos
-        """
-        external_projects = (
-            db.query(AfExternalProject)
-            .filter(
-                AfExternalProject.is_active == True,
-            ).all()
-        )
-        return external_projects
 
     def log_login_event(
         self,

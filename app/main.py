@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import auth
+from app.routes import external_projects
 
 
 # Inicialización de la aplicación FastAPI
@@ -35,3 +36,4 @@ app.add_middleware(
 # -----------------------------
 # Incluye el router de autenticación
 app.include_router(auth.router)
+app.include_router(external_projects.router)

@@ -1,6 +1,5 @@
-import token
 from sqlalchemy.orm import Session
-from typing import List, Dict
+from typing import  Dict
 from app.repositories.users_repository import UsersRepository
 from app.repositories.audit_repository import AuditRepository
 from app.schemas.auth import LoginRequest, LoginSuccessResponse, ResetPasswordResponse, VerifyOtpRequest, LoginResponse
@@ -55,12 +54,7 @@ class AuthService:
         self.email_repo = EmailRepository()
         self.password_policy_service = PasswordPolicyService()
     
-    def get_external_projects(self, db:Session) -> List[ExternalProjectResponse]:
-        """
-        Retorna los proyectos externos activos disponibles para SSO.
-        """
-        external_projects = self.audit_repo.get_active_ext_pro(db)
-        return external_projects;
+
 
     def login(self, db: Session, data: LoginRequest, ip: str, user_agent: str) -> LoginSuccessResponse:
         """
@@ -295,15 +289,14 @@ class AuthService:
             ip=ip,
             user_agent=user_agent,
         )
-        external_projects = self.audit_repo.get_active_ext_pro(db=db)
 
         db.commit()
+
 
         return LoginSuccessResponse(
             access_token=access_token,
             refresh_token=refresh_token,
-            expires_in=int(ACCESS_TTL.total_seconds()),
-            external_projects = external_projects
+            expires_in=int(ACCESS_TTL.total_seconds())
         )
     
     def refresh_token(self, db:Session, refresh_token:str) -> LoginResponse:
@@ -500,15 +493,13 @@ class AuthService:
             },
         )
 
-        external_projects = self.audit_repo.get_active_ext_pro(db=db)
 
 
         db.commit()
         return LoginSuccessResponse(
             access_token=access_token,
             refresh_token=refresh_token,
-            expires_in=int(ACCESS_TTL.total_seconds()),
-            external_projects = external_projects
+            expires_in=int(ACCESS_TTL.total_seconds())
         )
     
     def resend_otp(self, db, user, ip: str, user_agent: str):
