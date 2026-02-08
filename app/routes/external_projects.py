@@ -7,6 +7,14 @@ from app.dependencies.auth import get_current_user
 from app.schemas.external_projects import ExternalProjectResponse
 from app.services.ext_pro_service import ExtProService
 
+
+
+# ======================================================
+# Router de Usuarios
+# ======================================================
+# Prefijo global: /users
+# Tag utilizado por Swagger/OpenAPI para agrupar endpoints
+# ======================================================
 router = APIRouter(prefix="/external-projects", tags=["External projects"])
 
 @router.get("", response_model=List[ExternalProjectResponse], summary="Listar proyectos externos",

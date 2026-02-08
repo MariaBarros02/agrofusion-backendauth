@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from app.models.users import Users 
 from app.models.af_login_attempts import LoginAttempt  
@@ -28,6 +29,29 @@ class UsersRepository:
         :return: Instancia Users o None si no existe
         """
         return db.query(Users).filter(Users.email == email).first()
+    
+    def user_exists(self, db: Session, email: str | None,
+        numDoc: str | None) -> Users | None:
+        """
+        Obtiene un usuario por su email o numero de documento.
+
+        :param db: Sesión activa de base de datos
+        :param email: Email del usuario
+        :param numDoc: Número de docuemento del usuario
+        :return: Instancia Users o None si no existe
+        """
+        filters = []
+
+        if email:
+            filters.append(Users.email == email)
+
+        if numDoc:
+            filters.append(Users.identity_number == numDoc)
+
+        if not filters:
+            return None
+
+        return db.query(Users).filter(or_(*filters)).first()
 
     def is_account_lock_expired(self, locked_at) -> bool:
         """

@@ -85,6 +85,9 @@ class Users(Base):
         server_default=func.now()
     )
 
+    #Número de identidad
+    identity_number= Column(Text, nullable=False, unique=True)
+
     # Control de concurrencia
     row_version = Column(Integer, default=1)
 

@@ -15,8 +15,7 @@ def auth_error(code: str, status_code: int, meta:Optional[Dict[str, Any]] = None
         Lanza una excepción HTTP con un formato de error estandarizado.
 
         Args:
-                code (str): Código interno del error.
-                status_code (int): Código HTTP a retornar.
+                code (str): Código interno del error. EN TEXTO, no el código HTTP. Ejemplo: "USER_NOT_FOUND", etc.
                 meta (dict, opcional): Información adicional del error.
 
         Returns:
